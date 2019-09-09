@@ -29,9 +29,11 @@ def extract_by_id(dataset_id):
         print("data shape: ", df_all.shape)
         # print("data head: ", df_all.head(10))
 
+        output_file = "../data/full_dataset/dataset" + str(dataset_id) + "/extracted_data.tsv"
+
         # add column names
         df_extracted = pd.DataFrame(columns=['Event', 'Tweet_Id', 'Tweet', 'HashTags'])
-        df_extracted.to_csv("../data/dataset1/extracted_data.tsv", sep='\t', mode='a', index=False)
+        df_extracted.to_csv(output_file, sep='\t', mode='a', index=False)
         df_extracted = df_extracted[:-1]
 
         i = 0
@@ -50,18 +52,23 @@ def extract_by_id(dataset_id):
 
             # save to file when ITERATOR_LENGTH found
             if i == ITERATOR_LENGTH:
-                df_extracted.to_csv("../data/full_dataset/dataset1/extracted_data.tsv", sep='\t', mode='a', index=False,
+                df_extracted.to_csv(output_file, sep='\t', mode='a', index=False,
                                     header=False, encoding='utf-8')
                 i = 0
                 df_extracted = df_extracted[:-ITERATOR_LENGTH]
 
     elif dataset_id == 2:
-        root_path = "../data/dataset" + dataset_id
+        root_path = "../data/dataset" + str(dataset_id)
 
         for root, dirs, files in os.walk(root_path):
             if 'ids' in root:
                 folder_path = root + "/" + "selected"
+                category = os.path.basename(root)
+
                 for sub_root, sub_dirs, sub_files in os.walk(folder_path):
+                    output_file = "../data/full_dataset/dataset" + str(
+                        dataset_id) + "/extracted_data_" + category + ".tsv"
+
                     for file in sub_files:
                         file_path = folder_path + "/" + file
                         category = os.path.splitext(file)[0]
@@ -71,9 +78,7 @@ def extract_by_id(dataset_id):
 
                             # add column names
                             df_extracted = pd.DataFrame(columns=['Time_Cat', 'Tweet_Id', 'Tweet', 'HashTags'])
-                            df_extracted.to_csv("../data/dataset" + dataset_id + "/extracted_data.tsv", sep='\t',
-                                                mode='a',
-                                                index=False)
+                            df_extracted.to_csv(output_file, sep='\t', mode='a', index=False)
                             df_extracted = df_extracted[:-1]
 
                             i = 0
@@ -95,9 +100,7 @@ def extract_by_id(dataset_id):
                                 # save to file when ITERATOR_LENGTH found
                                 if i == ITERATOR_LENGTH:
                                     df_extracted.to_csv(
-                                        "../data/full_dataset/dataset" + dataset_id + "/extracted_data.tsv",
-                                        sep='\t', mode='a', index=False,
-                                        header=False, encoding='utf-8')
+                                        output_file, sep='\t', mode='a', index=False, header=False, encoding='utf-8')
                                     i = 0
                                     df_extracted = df_extracted[:-ITERATOR_LENGTH]
 
