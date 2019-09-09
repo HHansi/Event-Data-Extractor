@@ -69,17 +69,17 @@ def extract_by_id(dataset_id):
                     output_file = "../data/full_dataset/dataset" + str(
                         dataset_id) + "/extracted_data_" + category + ".tsv"
 
+                    # add column names
+                    df_extracted = pd.DataFrame(columns=['Time_Cat', 'Tweet_Id', 'Tweet', 'HashTags'])
+                    df_extracted.to_csv(output_file, sep='\t', mode='a', index=False)
+                    df_extracted = df_extracted[:-1]
+
                     for file in sub_files:
                         file_path = folder_path + "/" + file
                         category = os.path.splitext(file)[0]
 
                         with open(file_path) as f:
                             lines = f.readlines()
-
-                            # add column names
-                            df_extracted = pd.DataFrame(columns=['Time_Cat', 'Tweet_Id', 'Tweet', 'HashTags'])
-                            df_extracted.to_csv(output_file, sep='\t', mode='a', index=False)
-                            df_extracted = df_extracted[:-1]
 
                             i = 0
                             for line in lines:
@@ -91,8 +91,7 @@ def extract_by_id(dataset_id):
                                         {'Time_Cat': category, 'Tweet_Id': tweet_id, 'Tweet': tweet.text,
                                          'HashTags': get_hashtags(tweet.entities.get('hashtags'))}, ignore_index=True)
                                 except tweepy.TweepError:
-                                    print('Error occurred while retrieving Tweet: ' + str(tweet_id) + " - " + str(
-                                        tweepy.TweepError.reason))
+                                    print('Error occurred while retrieving Tweet: ' + str(tweet_id))
                                     df_extracted = df_extracted.append(
                                         {'Time_Cat': category, 'Tweet_Id': tweet_id, 'Tweet': 'NA', 'HashTags': 'NA'},
                                         ignore_index=True)
@@ -114,20 +113,6 @@ def get_hashtags(json_array):
         else:
             hashtag_text = hashtag_text + "," + item['text']
     return hashtag_text
-
-
-# def test():
-#     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-#     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-#     api = tweepy.API(auth)
-#     tweet_id = 198774046878474240
-#     tweet = api.get_status(tweet_id)
-#     print(tweet.text)
-#     print(tweet.created_at)
-#     print(tweet.entities.get('hashtags'))
-#     print(get_hashtags(tweet.entities.get('hashtags')))
-#
-#     print(tweet._json)
 
 
 if __name__ == "__main__":
