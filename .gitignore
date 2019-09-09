@@ -198,7 +198,7 @@ fabric.properties
 data/dataset1
 data/dataset2
 data/full_dataset
-config
+config.txt
 
 
 
