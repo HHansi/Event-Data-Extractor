@@ -34,7 +34,7 @@ def get_tweet_by_id(id):
     return tweet
 
 
-def get_tweet_by_hashtag(hashtag, from_date):
+def get_tweet_by_hashtag(hashtag, from_date, to_date):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -50,12 +50,11 @@ def get_tweet_by_hashtag(hashtag, from_date):
     i = 0
     for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
                                lang="en",
-                               since=from_date).items():
+                               since=from_date, until=to_date).items():
         i += 1
-        print(tweet.created_at, tweet.text, get_hashtags(tweet.entities.get('hashtags')))
+        print(tweet.id_str, tweet.created_at, tweet.text, get_hashtags(tweet.entities.get('hashtags')))
         csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.text.encode('utf-8'),
                             get_hashtags(tweet.entities.get('hashtags')).encode('utf-8'),
-                            get_location(tweet.coordinates),
                             tweet.user.location.encode('utf-8')])
 
         # print('Sleeping for (seconds) : 1')
@@ -98,4 +97,4 @@ if __name__ == "__main__":
 
     # get_tweet_by_hashtag("#UCLfinal", "2019-06-01")
     # get_tweet_by_hashtag("#Barcelona", "2019-10-01")
-    get_tweet_by_hashtag("#BrexitVote ", "2019-10-18")
+    get_tweet_by_hashtag("#BrexitVote ", "2019-10-18", "2019-10-20")
