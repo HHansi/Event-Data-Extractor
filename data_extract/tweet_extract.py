@@ -51,13 +51,14 @@ def get_tweet_by_hashtag(hashtag, from_date, to_date):
     i = 0
     for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
                                lang="en",
-                               since=from_date, until=to_date).items():
+                               since=from_date, until=to_date, tweet_mode='extended').items():
         i += 1
-        print(tweet.id_str, tweet.created_at, tweet.text, get_hashtags(tweet.entities.get('hashtags')))
+        # print(tweet.id_str, tweet.created_at, tweet.text, get_hashtags(tweet.entities.get('hashtags')))
+        print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
         # csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.text.encode('utf-8'),
         #                     get_hashtags(tweet.entities.get('hashtags')).encode('utf-8'),
         #                     tweet.user.location.encode('utf-8')])
-        csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.text,
+        csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
                             get_hashtags(tweet.entities.get('hashtags')),
                             tweet.user.location])
 
@@ -70,6 +71,57 @@ def get_tweet_by_hashtag(hashtag, from_date, to_date):
         # if i == 450 and time_diff.seconds < TIME_LIMIT:
         #     print('Sleeping for (seconds) : ', time_diff.seconds)
         #     time.sleep(TIME_LIMIT - time_diff.seconds)
+
+
+def get_tweet_by_hashtag_with_maxid(hashtag, from_date, to_date, max_id):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    filename = hashtag.split('#')[1]
+
+    # Open/Create a file to append data
+    csv_file = open(FULL_DATA_SET_PATH + filename + '.tsv', 'a', newline='', encoding='utf-8')
+    # Use csv Writer
+    csv_writer = csv.writer(csv_file, delimiter='\t')
+
+    for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
+                               lang="en",
+                               since=from_date, until=to_date, max_id=max_id, tweet_mode='extended').items():
+        print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+
+        csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+                             get_hashtags(tweet.entities.get('hashtags')),
+                             tweet.user.location])
+
+        # print('Sleeping for (seconds) : 1')
+        time.sleep(1)
+
+
+def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, since_id):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    filename = hashtag.split('#')[1]
+
+    # Open/Create a file to append data
+    csv_file = open(FULL_DATA_SET_PATH + filename + '.tsv', 'a', newline='', encoding='utf-8')
+    # Use csv Writer
+    csv_writer = csv.writer(csv_file, delimiter='\t')
+
+    for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
+                               lang="en",
+                               since=from_date, until=to_date, max_id=max_id, since_id=since_id,
+                               tweet_mode='extended').items():
+        print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+
+        csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+                             get_hashtags(tweet.entities.get('hashtags')),
+                             tweet.user.location])
+
+        # print('Sleeping for (seconds) : 1')
+        time.sleep(1)
 
 
 # get hash tag text from tweepy status hashtags
@@ -101,5 +153,5 @@ if __name__ == "__main__":
 
     # get_tweet_by_hashtag("#UCLfinal", "2019-06-01")
     # get_tweet_by_hashtag("#Barcelona", "2019-10-01")
-    get_tweet_by_hashtag("#BrexitVote ", "2019-10-18", "2019-10-20")
-
+    # get_tweet_by_hashtag("#PeoplesVoteMarch", "2019-10-18", "2019-10-20")
+    get_tweet_by_hashtag_with_maxid("#Brexit", "2019-10-18", "2019-10-20", "1185519806470115328")
