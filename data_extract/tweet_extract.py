@@ -26,7 +26,7 @@ def get_tweet_by_id(id):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     api = tweepy.API(auth)
-    tweet = api.get_status(id)
+    tweet = api.get_status(id, tweet_mode="extended")
 
     print("Tweet_ID: " + str(id))
     print("Tweet: " + tweet.text)
@@ -42,25 +42,33 @@ def get_tweet_by_hashtag(hashtag, from_date, to_date):
     filename = hashtag.split('#')[1]
 
     # Open/Create a file to append data
-    # csvFile = open(FULL_DATA_SET_PATH + filename + '.tsv', 'a', newline='', encoding='utf-8')
     csvFile = open(FULL_DATA_SET_PATH + filename + '.tsv', 'a', newline='', encoding='utf-8')
     # Use csv Writer
     csvWriter = csv.writer(csvFile, delimiter='\t')
 
-    start_time = datetime.datetime.now()
-    i = 0
+    # start_time = datetime.datetime.now()
+    # i = 0
     for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
                                lang="en",
                                since=from_date, until=to_date, tweet_mode='extended').items():
-        i += 1
-        # print(tweet.id_str, tweet.created_at, tweet.text, get_hashtags(tweet.entities.get('hashtags')))
-        print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
-        # csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.text.encode('utf-8'),
-        #                     get_hashtags(tweet.entities.get('hashtags')).encode('utf-8'),
-        #                     tweet.user.location.encode('utf-8')])
-        csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
-                            get_hashtags(tweet.entities.get('hashtags')),
-                            tweet.user.location])
+        # i += 1
+
+        # print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+        # csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+        #                     get_hashtags(tweet.entities.get('hashtags')),
+        #                     tweet.user.location])
+
+        try:
+            print(tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                  get_hashtags(tweet.entities.get('hashtags')))
+            csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                                 get_hashtags(tweet.entities.get('hashtags')),
+                                 tweet.user.location])
+        except AttributeError:  # Not a Retweet
+            print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+            csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+                                 get_hashtags(tweet.entities.get('hashtags')),
+                                 tweet.user.location])
 
         # print('Sleeping for (seconds) : 1')
         time.sleep(1)
@@ -154,4 +162,11 @@ if __name__ == "__main__":
     # get_tweet_by_hashtag("#UCLfinal", "2019-06-01")
     # get_tweet_by_hashtag("#Barcelona", "2019-10-01")
     # get_tweet_by_hashtag("#PeoplesVoteMarch", "2019-10-18", "2019-10-20")
-    get_tweet_by_hashtag_with_maxid("#Brexit", "2019-10-18", "2019-10-20", "1185519806470115328")
+    # get_tweet_by_hashtag_within_id_range("#PeoplesVoteMarch", "2019-10-18", "2019-10-20", "1185490689666228224",
+    #                                 "1185433082599374849")
+    # get_tweet_by_hashtag_within_id_range("#FinalSay", "2019-10-18", "2019-10-20", "1185616611748859905",
+    #                                      "1185433082599374849")
+    # get_tweet_by_hashtag_within_id_range("#BrexitDeal", "2019-10-18", "2019-10-20", "1185526625351409664",
+    #                                      "1185433082599374849")
+
+    get_tweet_by_id(1185579083385724928)
