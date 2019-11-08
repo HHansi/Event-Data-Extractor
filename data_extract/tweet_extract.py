@@ -1,7 +1,6 @@
 # Created by Hansi at 9/6/2019
 import configparser
 import csv
-import datetime
 import time
 
 import tweepy
@@ -34,6 +33,9 @@ def get_tweet_by_id(id):
     return tweet
 
 
+# extract tweets using hashtag, from_date and to_date
+# date format - '2019-06-01'
+# note - If to_date is givens as '2019-06-01', this collects tweets from '2019-06-01 23:59'
 def get_tweet_by_hashtag(hashtag, from_date, to_date):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
@@ -51,36 +53,27 @@ def get_tweet_by_hashtag(hashtag, from_date, to_date):
     for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
                                lang="en",
                                since=from_date, until=to_date, tweet_mode='extended').items():
-        # i += 1
-
-        # print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
-        # csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
-        #                     get_hashtags(tweet.entities.get('hashtags')),
-        #                     tweet.user.location])
 
         try:
             print(tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
                   get_hashtags(tweet.entities.get('hashtags')))
             csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
-                                 get_hashtags(tweet.entities.get('hashtags')),
-                                 tweet.user.location])
+                                get_hashtags(tweet.entities.get('hashtags')),
+                                tweet.user.location])
         except AttributeError:  # Not a Retweet
             print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
             csvWriter.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
-                                 get_hashtags(tweet.entities.get('hashtags')),
-                                 tweet.user.location])
+                                get_hashtags(tweet.entities.get('hashtags')),
+                                tweet.user.location])
 
         # print('Sleeping for (seconds) : 1')
         time.sleep(1)
-
         # 450 call per 15 mins
-        # current_time = datetime.datetime.now()
-        # time_diff = current_time - start_time
-        # if i == 450 and time_diff.seconds < TIME_LIMIT:
-        #     print('Sleeping for (seconds) : ', time_diff.seconds)
-        #     time.sleep(TIME_LIMIT - time_diff.seconds)
 
 
+# extract tweets of given hashtag between from and to dates with id less than max_id
+# date format - '2019-06-01', id format - id as string
+# note - If to_date is givens as '2019-06-01', this collects tweets from '2019-06-01 23:59'
 def get_tweet_by_hashtag_with_maxid(hashtag, from_date, to_date, max_id):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
@@ -96,16 +89,25 @@ def get_tweet_by_hashtag_with_maxid(hashtag, from_date, to_date, max_id):
     for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
                                lang="en",
                                since=from_date, until=to_date, max_id=max_id, tweet_mode='extended').items():
-        print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
-
-        csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
-                             get_hashtags(tweet.entities.get('hashtags')),
-                             tweet.user.location])
+        try:
+            print(tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                  get_hashtags(tweet.entities.get('hashtags')))
+            csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                                 get_hashtags(tweet.entities.get('hashtags')),
+                                 tweet.user.location])
+        except AttributeError:  # Not a Retweet
+            print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+            csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+                                 get_hashtags(tweet.entities.get('hashtags')),
+                                 tweet.user.location])
 
         # print('Sleeping for (seconds) : 1')
         time.sleep(1)
 
 
+# extract tweets of given hashtag between from and to dates with id less than max_id and more than since_id
+# date format - '2019-06-01', id format - id as string
+# note - If to_date is givens as '2019-06-01', this collects tweets from '2019-06-01 23:59'
 def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, since_id):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
@@ -122,11 +124,18 @@ def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, si
                                lang="en",
                                since=from_date, until=to_date, max_id=max_id, since_id=since_id,
                                tweet_mode='extended').items():
-        print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
 
-        csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
-                             get_hashtags(tweet.entities.get('hashtags')),
-                             tweet.user.location])
+        try:
+            print(tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                  get_hashtags(tweet.entities.get('hashtags')))
+            csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                                 get_hashtags(tweet.entities.get('hashtags')),
+                                 tweet.user.location])
+        except AttributeError:  # Not a Retweet
+            print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+            csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+                                 get_hashtags(tweet.entities.get('hashtags')),
+                                 tweet.user.location])
 
         # print('Sleeping for (seconds) : 1')
         time.sleep(1)
