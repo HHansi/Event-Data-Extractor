@@ -1,11 +1,13 @@
 # Created by Hansi at 9/6/2019
 import configparser
+import csv
 import datetime
 import os
 import time
 
 import pandas as pd
 import tweepy
+
 from tweet_extract import get_hashtags
 
 ITERATOR_LENGTH = 50
@@ -121,5 +123,134 @@ def extract_dataset(dataset_id):
                                         ignore_index=True)
 
 
+# Extract tweets by given IDs
+# input_filepath - path to .tsv file which contains IDs
+# output_filepath - path to .tsv file where the extracted tweets need to be saved
+def extract_by_ids(input_filepath, output_filepath):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    start_time = datetime.datetime.now()
+
+    csv_file = open(input_filepath, encoding='utf-8')
+    csv_reader = csv.reader(csv_file, delimiter='\t')
+
+    csv_file_out = open(output_filepath, 'a', newline='', encoding='utf-8')
+    csv_writer = csv.writer(csv_file_out, delimiter='\t')
+
+    i = 0
+    for row in csv_reader:
+        i += 1
+        tweet_id = row[0]
+        try:
+            tweet = api.get_status(tweet_id, tweet_mode="extended")
+            try:
+                print(tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                      get_hashtags(tweet.entities.get('hashtags')))
+                csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                                     get_hashtags(tweet.entities.get('hashtags')),
+                                     tweet.user.location])
+            except AttributeError:  # Not a Retweet
+                print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+                csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+                                     get_hashtags(tweet.entities.get('hashtags')),
+                                     tweet.user.location])
+
+        except tweepy.TweepError:
+            print('Error occurred while retrieving Tweet: ' + str(tweet_id))
+            csv_writer.writerow([tweet_id, '_na_', '_na_', '_na_', '_na_'])
+
+        if i == API_CALL_LIMIT:
+            current_time = datetime.datetime.now()
+            time_diff = current_time - start_time
+
+            if time_diff.seconds < TIME_LIMIT:
+                print('Sleeping for (seconds) : ', time_diff.seconds)
+                time.sleep(TIME_LIMIT - time_diff.seconds)
+
+            # initialize i and start_time
+            i = 0
+            start_time = datetime.datetime.now()
+
+
+# Extract missing tweets in bulks - extract tweet for id at row 0 and save content with used id and other ids in row 1
+# Input format - [id    id1,id2..] (tsv file with id and ids which share same content)
+def extract_missing_tweets_by_id(input_filepath, output_filepath):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    start_time = datetime.datetime.now()
+
+    csv_file = open(input_filepath, encoding='utf-8')
+    csv_reader = csv.reader(csv_file, delimiter='\t')
+
+    csv_file_out = open(output_filepath, 'a', newline='', encoding='utf-8')
+    csv_writer = csv.writer(csv_file_out, delimiter='\t')
+
+    i = 0
+    for row in csv_reader:
+        i += 1
+        tweet_id = row[0]
+        other_ids = row[1].strip().split(',')
+        try:
+            tweet = api.get_status(tweet_id, tweet_mode="extended")
+            try:
+                print(tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                      get_hashtags(tweet.entities.get('hashtags')))
+                csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.retweeted_status.full_text,
+                                     get_hashtags(tweet.entities.get('hashtags')),
+                                     tweet.user.location])
+                for id in other_ids:
+                    if not id.isspace():
+                        csv_writer.writerow([id, tweet.created_at, tweet.retweeted_status.full_text,
+                                         get_hashtags(tweet.entities.get('hashtags')),
+                                         tweet.user.location])
+            except AttributeError:  # Not a Retweet
+                print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
+                csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
+                                     get_hashtags(tweet.entities.get('hashtags')),
+                                     tweet.user.location])
+                for id in other_ids:
+                    if not id.isspace():
+                        csv_writer.writerow([id, tweet.created_at, tweet.full_text,
+                                         get_hashtags(tweet.entities.get('hashtags')),
+                                         tweet.user.location])
+
+        except tweepy.TweepError:
+            print('Error occurred while retrieving Tweet: ' + str(tweet_id))
+            csv_writer.writerow([tweet_id, '_na_', '_na_', '_na_', '_na_'])
+
+            for id in other_ids:
+                if not id.isspace():
+                    csv_writer.writerow([id, '_na_', '_na_', '_na_', '_na_'])
+
+        if i == API_CALL_LIMIT:
+            current_time = datetime.datetime.now()
+            time_diff = current_time - start_time
+
+            if time_diff.seconds < TIME_LIMIT:
+                print('Sleeping for (seconds) : ', time_diff.seconds)
+                time.sleep(TIME_LIMIT - time_diff.seconds)
+
+            # initialize i and start_time
+            i = 0
+            start_time = datetime.datetime.now()
+
+
 if __name__ == "__main__":
-    extract_dataset(2)
+    # extract_dataset(2)
+    input_folder = '../data/full_dataset/BrexitVote/filtered_tweet/missing_id'
+    output_folder = '../data/full_dataset/BrexitVote/filtered_tweet/missing_tweet_extract'
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    for root, dirs, files in os.walk(input_folder):
+        for file in files:
+            print(file)
+            input_filepath = input_folder + "/" + file
+            output_filepath = output_folder + "/" + file
+            extract_missing_tweets_by_id(input_filepath, output_filepath)
+
+
