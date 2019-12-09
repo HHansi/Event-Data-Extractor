@@ -7,7 +7,6 @@ import time
 
 import pandas as pd
 import tweepy
-
 from tweet_extract import get_hashtags
 
 ITERATOR_LENGTH = 50
@@ -126,6 +125,7 @@ def extract_dataset(dataset_id):
 # Extract tweets by given IDs
 # input_filepath - path to .tsv file which contains IDs
 # output_filepath - path to .tsv file where the extracted tweets need to be saved
+# Output format - [id, timestamp, tweet text, hashtags, user location]
 def extract_by_ids(input_filepath, output_filepath):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
@@ -176,7 +176,11 @@ def extract_by_ids(input_filepath, output_filepath):
 
 # Extract missing tweets in bulks - extract tweet for id at row 0 and save content with used id and other ids in row 1
 # Input format - [id    id1,id2..] (tsv file with id and ids which share same content)
-def extract_missing_tweets_by_id(input_filepath, output_filepath):
+# input_filepath - file which contains IDs in the input format
+# input_filepath_data_temp - file which contains tweet data correspond to the ids given in input_file(event the tweet
+# text is same, timestamp and user location details need to be taken from original tweet data)
+# output_filepath - file path to output
+def extract_missing_tweets_by_id(input_filepath, input_data_filepath, output_filepath):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -186,8 +190,16 @@ def extract_missing_tweets_by_id(input_filepath, output_filepath):
     csv_file = open(input_filepath, encoding='utf-8')
     csv_reader = csv.reader(csv_file, delimiter='\t')
 
+    csv_file_data = open(input_data_filepath, encoding='utf-8')
+    csv_reader_data = csv.reader(csv_file_data, delimiter='\t')
+
     csv_file_out = open(output_filepath, 'a', newline='', encoding='utf-8')
     csv_writer = csv.writer(csv_file_out, delimiter='\t')
+
+    # data extracted for missing text
+    dict_data = dict()
+    for row in csv_reader_data:
+        dict_data[row[0]] = row
 
     i = 0
     for row in csv_reader:
@@ -205,8 +217,8 @@ def extract_missing_tweets_by_id(input_filepath, output_filepath):
                 for id in other_ids:
                     if not id.isspace():
                         csv_writer.writerow([id, tweet.created_at, tweet.retweeted_status.full_text,
-                                         get_hashtags(tweet.entities.get('hashtags')),
-                                         tweet.user.location])
+                                             get_hashtags(tweet.entities.get('hashtags')),
+                                             tweet.user.location])
             except AttributeError:  # Not a Retweet
                 print(tweet.id_str, tweet.created_at, tweet.full_text, get_hashtags(tweet.entities.get('hashtags')))
                 csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
@@ -214,9 +226,11 @@ def extract_missing_tweets_by_id(input_filepath, output_filepath):
                                      tweet.user.location])
                 for id in other_ids:
                     if not id.isspace():
-                        csv_writer.writerow([id, tweet.created_at, tweet.full_text,
-                                         get_hashtags(tweet.entities.get('hashtags')),
-                                         tweet.user.location])
+                        timestamp = dict_data[id][1]
+                        user_location = dict_data[id][4]
+                        csv_writer.writerow([id, timestamp, tweet.full_text,
+                                             get_hashtags(tweet.entities.get('hashtags')),
+                                             user_location])
 
         except tweepy.TweepError:
             print('Error occurred while retrieving Tweet: ' + str(tweet_id))
@@ -240,7 +254,6 @@ def extract_missing_tweets_by_id(input_filepath, output_filepath):
 
 
 if __name__ == "__main__":
-    # extract_dataset(2)
     input_folder = '../data/full_dataset/BrexitVote/filtered_tweet/missing_id'
     output_folder = '../data/full_dataset/BrexitVote/filtered_tweet/missing_tweet_extract'
     if not os.path.exists(output_folder):
@@ -252,5 +265,4 @@ if __name__ == "__main__":
             input_filepath = input_folder + "/" + file
             output_filepath = output_folder + "/" + file
             extract_missing_tweets_by_id(input_filepath, output_filepath)
-
 
