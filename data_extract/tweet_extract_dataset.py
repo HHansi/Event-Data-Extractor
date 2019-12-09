@@ -125,7 +125,7 @@ def extract_dataset(dataset_id):
 # Extract tweets by given IDs
 # input_filepath - path to .tsv file which contains IDs
 # output_filepath - path to .tsv file where the extracted tweets need to be saved
-# Output format - [id, timestamp, tweet text, hashtags, user location]
+# Output format - [id, timestamp, tweet text, hashtags, user location] tsv file
 def extract_by_ids(input_filepath, output_filepath):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
