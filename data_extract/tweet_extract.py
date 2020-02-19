@@ -18,7 +18,8 @@ CONSUMER_SECRET = configParser.get('twitter-dev-configs', 'CONSUMER_SECRET')
 OAUTH_TOKEN = configParser.get('twitter-dev-configs', 'OAUTH_TOKEN')
 OAUTH_TOKEN_SECRET = configParser.get('twitter-dev-configs', 'OAUTH_TOKEN_SECRET')
 
-FULL_DATA_SET_PATH = '../data/full_dataset/'
+# FULL_DATA_SET_PATH = '../data/full_dataset/'
+FULL_DATA_SET_PATH = configParser.get('project-configs', 'FULL_DATA_SET_PATH')
 
 
 def get_tweet_by_id(id):
@@ -170,7 +171,7 @@ if __name__ == "__main__":
 
     # get_tweet_by_hashtag("#UCLfinal", "2019-06-01")
     # get_tweet_by_hashtag("#Barcelona", "2019-10-01")
-    # get_tweet_by_hashtag("#PeoplesVoteMarch", "2019-10-18", "2019-10-20")
+    get_tweet_by_hashtag("#UCL", "2020-02-17", "2020-02-19")
     # get_tweet_by_hashtag_within_id_range("#PeoplesVoteMarch", "2019-10-18", "2019-10-20", "1185490689666228224",
     #                                 "1185433082599374849")
     # get_tweet_by_hashtag_within_id_range("#FinalSay", "2019-10-18", "2019-10-20", "1185616611748859905",
@@ -178,4 +179,7 @@ if __name__ == "__main__":
     # get_tweet_by_hashtag_within_id_range("#BrexitDeal", "2019-10-18", "2019-10-20", "1185526625351409664",
     #                                      "1185433082599374849")
 
-    get_tweet_by_id(1185579083385724928)
+    # get_tweet_by_id(1185579083385724928)
+    # get_tweet_by_hashtag("#ElectionResults2019", "2019-12-13", "2019-12-14")
+
+    # get_tweet_by_hashtag_within_id_range("#MCFC", "2020-01-07", "2020-01-08", "1214630367837200389", "1214630282281664512")
