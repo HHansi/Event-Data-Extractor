@@ -5,13 +5,15 @@ import time
 
 import tweepy
 
+import project_config
+
 ITERATOR_LENGTH = 50
 API_CALL_LIMIT = 180
 TIME_LIMIT = 15 * 60
 
 configParser = configparser.RawConfigParser()
-configFilePath = "../config.txt"
-configParser.read(configFilePath)
+# configFilePath = "../config.txt"
+configParser.read(project_config.twitter_config_path)
 
 CONSUMER_KEY = configParser.get('twitter-dev-configs', 'CONSUMER_KEY')
 CONSUMER_SECRET = configParser.get('twitter-dev-configs', 'CONSUMER_SECRET')
@@ -19,7 +21,7 @@ OAUTH_TOKEN = configParser.get('twitter-dev-configs', 'OAUTH_TOKEN')
 OAUTH_TOKEN_SECRET = configParser.get('twitter-dev-configs', 'OAUTH_TOKEN_SECRET')
 
 # FULL_DATA_SET_PATH = '../data/full_dataset/'
-FULL_DATA_SET_PATH = configParser.get('project-configs', 'FULL_DATA_SET_PATH')
+FULL_DATA_SET_PATH = project_config.data_path + 'full_dataset/'
 
 
 def get_tweet_by_id(id):
