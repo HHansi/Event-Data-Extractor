@@ -173,11 +173,11 @@ if __name__ == "__main__":
 
     # get_tweet_by_hashtag("#UCLfinal", "2019-06-01")
     # get_tweet_by_hashtag("#Barcelona", "2019-10-01")
-    get_tweet_by_hashtag("#UCL", "2020-02-17", "2020-02-19")
-    # get_tweet_by_hashtag_within_id_range("#PeoplesVoteMarch", "2019-10-18", "2019-10-20", "1185490689666228224",
-    #                                 "1185433082599374849")
-    # get_tweet_by_hashtag_within_id_range("#FinalSay", "2019-10-18", "2019-10-20", "1185616611748859905",
-    #                                      "1185433082599374849")
+    # get_tweet_by_hashtag("#UCL", "2020-02-17", "2020-02-19")
+    get_tweet_by_hashtag_within_id_range("#ATLLIV", "2020-02-17", "2020-02-19", "1229881019790249986",
+                                    "1229827921495216129")
+    get_tweet_by_hashtag_within_id_range("#BVBPSG", "2020-02-17", "2020-02-19", "1229881019790249986",
+                                         "1229827921495216129")
     # get_tweet_by_hashtag_within_id_range("#BrexitDeal", "2019-10-18", "2019-10-20", "1185526625351409664",
     #                                      "1185433082599374849")
 
