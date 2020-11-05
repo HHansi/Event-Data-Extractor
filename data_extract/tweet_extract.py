@@ -85,7 +85,7 @@ def get_tweet_by_hashtag(hashtag, from_date, to_date):
 
     filename = hashtag.split('#')[1]
 
-    output_data_path = os.path.join(FULL_DATA_SET_PATH, "test", filename + ".json")
+    output_data_path = os.path.join(FULL_DATA_SET_PATH, filename + ".json")
 
     for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
                                lang="en",
