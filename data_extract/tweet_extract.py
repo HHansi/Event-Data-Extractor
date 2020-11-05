@@ -1,11 +1,14 @@
 # Created by Hansi at 9/6/2019
 import configparser
 import csv
+import json
+import os
 import time
 
 import tweepy
 
 import project_config
+from data_extract.tweet_util import get_hashtags
 
 ITERATOR_LENGTH = 50
 API_CALL_LIMIT = 180
@@ -36,10 +39,10 @@ def get_tweet_by_id(id):
     return tweet
 
 
-# extract tweets using hashtag, from_date and to_date
+# extract tweet summaries using hashtag, from_date and to_date
 # date format - '2019-06-01'
 # note - If to_date is givens as '2019-06-01', this collects tweets from '2019-06-01 23:59'
-def get_tweet_by_hashtag(hashtag, from_date, to_date):
+def get_tweet_summary_by_hashtag(hashtag, from_date, to_date):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -70,6 +73,26 @@ def get_tweet_by_hashtag(hashtag, from_date, to_date):
                                 tweet.user.location])
 
         # print('Sleeping for (seconds) : 1')
+        time.sleep(1)
+        # 450 call per 15 mins
+
+
+# extract tweets using hashtag, from_date and to_date
+def get_tweet_by_hashtag(hashtag, from_date, to_date):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    filename = hashtag.split('#')[1]
+
+    output_data_path = os.path.join(FULL_DATA_SET_PATH, "test", filename + ".json")
+
+    for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
+                               lang="en",
+                               since=from_date, until=to_date, tweet_mode='extended').items():
+        print(tweet.id_str, tweet.created_at)
+        with open(output_data_path, 'a', encoding='utf-8') as f:
+            f.write("%s\n" % json.dumps(tweet._json))
         time.sleep(1)
         # 450 call per 15 mins
 
@@ -144,15 +167,15 @@ def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, si
         time.sleep(1)
 
 
-# get hash tag text from tweepy status hashtags
-def get_hashtags(json_array):
-    hashtag_text = ''
-    for item in json_array:
-        if hashtag_text == '':
-            hashtag_text = item['text']
-        else:
-            hashtag_text = hashtag_text + "," + item['text']
-    return hashtag_text
+# # get hash tag text from tweepy status hashtags
+# def get_hashtags(json_array):
+#     hashtag_text = ''
+#     for item in json_array:
+#         if hashtag_text == '':
+#             hashtag_text = item['text']
+#         else:
+#             hashtag_text = hashtag_text + "," + item['text']
+#     return hashtag_text
 
 
 # get geographic location of this Tweet as reported by the user or client application
@@ -174,10 +197,11 @@ if __name__ == "__main__":
     # get_tweet_by_hashtag("#UCLfinal", "2019-06-01")
     # get_tweet_by_hashtag("#Barcelona", "2019-10-01")
     # get_tweet_by_hashtag("#UCL", "2020-02-17", "2020-02-19")
-    get_tweet_by_hashtag_within_id_range("#ATLLIV", "2020-02-17", "2020-02-19", "1229881019790249986",
-                                    "1229827921495216129")
-    get_tweet_by_hashtag_within_id_range("#BVBPSG", "2020-02-17", "2020-02-19", "1229881019790249986",
-                                         "1229827921495216129")
+    get_tweet_by_hashtag("#USelection", "2020-11-03", "2020-11-04")
+    # get_tweet_by_hashtag_within_id_range("#ATLLIV", "2020-02-17", "2020-02-19", "1229881019790249986",
+    #                                 "1229827921495216129")
+    # get_tweet_by_hashtag_within_id_range("#BVBPSG", "2020-02-17", "2020-02-19", "1229881019790249986",
+    #                                      "1229827921495216129")
     # get_tweet_by_hashtag_within_id_range("#BrexitDeal", "2019-10-18", "2019-10-20", "1185526625351409664",
     #                                      "1185433082599374849")
 
