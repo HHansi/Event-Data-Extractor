@@ -8,7 +8,7 @@ import time
 import tweepy
 
 import project_config
-from data_extract.tweet_util import get_hashtags
+# from data_extract.tweet_util import get_hashtags
 
 ITERATOR_LENGTH = 50
 API_CALL_LIMIT = 180
@@ -167,15 +167,15 @@ def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, si
         time.sleep(1)
 
 
-# # get hash tag text from tweepy status hashtags
-# def get_hashtags(json_array):
-#     hashtag_text = ''
-#     for item in json_array:
-#         if hashtag_text == '':
-#             hashtag_text = item['text']
-#         else:
-#             hashtag_text = hashtag_text + "," + item['text']
-#     return hashtag_text
+# get hash tag text from tweepy status hashtags
+def get_hashtags(json_array):
+    hashtag_text = ''
+    for item in json_array:
+        if hashtag_text == '':
+            hashtag_text = item['text']
+        else:
+            hashtag_text = hashtag_text + "," + item['text']
+    return hashtag_text
 
 
 # get geographic location of this Tweet as reported by the user or client application
