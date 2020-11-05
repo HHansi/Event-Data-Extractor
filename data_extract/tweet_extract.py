@@ -134,7 +134,7 @@ def get_tweet_by_hashtag_with_maxid(hashtag, from_date, to_date, max_id):
 # extract tweets of given hashtag between from and to dates with id less than max_id and more than since_id
 # date format - '2019-06-01', id format - id as string
 # note - If to_date is givens as '2019-06-01', this collects tweets from '2019-06-01 23:59'
-def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, since_id):
+def get_tweet_summary_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, since_id):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -162,6 +162,26 @@ def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, si
             csv_writer.writerow([tweet.id_str, tweet.created_at, tweet.full_text,
                                  get_hashtags(tweet.entities.get('hashtags')),
                                  tweet.user.location])
+
+        # print('Sleeping for (seconds) : 1')
+        time.sleep(1)
+
+
+def get_tweet_by_hashtag_within_id_range(hashtag, from_date, to_date, max_id, since_id):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    filename = hashtag.split('#')[1]
+
+    output_data_path = os.path.join(FULL_DATA_SET_PATH, filename + ".json")
+
+    for tweet in tweepy.Cursor(api.search, q=hashtag, count=100,
+                               lang="en",
+                               since=from_date, until=to_date, max_id=max_id, since_id=since_id,
+                               tweet_mode='extended').items():
+        with open(output_data_path, 'a', encoding='utf-8') as f:
+            f.write("%s\n" % json.dumps(tweet._json))
 
         # print('Sleeping for (seconds) : 1')
         time.sleep(1)
