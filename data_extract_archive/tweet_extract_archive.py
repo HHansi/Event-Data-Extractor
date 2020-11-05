@@ -110,7 +110,7 @@ def filter_data(folder_path, lang=None, hashtags=None, tokens=None, lowercase_ma
                         for line in f:
                             tweet_json = json.loads(line)
                             filtered_tweet, count = filter_json(tweet_json, lang=lang, hashtags=hashtags, tokens=tokens,
-                                                         lowercase_match=lowercase_match, include_rt=include_rt)
+                                                                lowercase_match=lowercase_match, include_rt=include_rt)
                             tweet_count += count
                             if filtered_tweet:
                                 data.append(filtered_tweet)
@@ -118,6 +118,56 @@ def filter_data(folder_path, lang=None, hashtags=None, tokens=None, lowercase_ma
                                     output_file.write("%s\n" % json.dumps(filtered_tweet))
     if output_file_path:
         output_file.close()
+
+    print('tweet count: ', tweet_count)
+
+
+def filter_data_multiple(folder_path, dict_tags, lang=None, lowercase_match=True, output_folder_path=None,
+                         include_rt=False):
+    if lowercase_match:
+        for key in dict_tags.keys():
+            hashtags = dict_tags[key][0]
+            tokens = dict_tags[key][1]
+            if hashtags:
+                hashtags = [token.lower() for token in hashtags]
+            if tokens:
+                tokens = [token.lower() for token in tokens]
+            dict_tags[key] = [hashtags, tokens]
+
+    if output_folder_path:
+        dict_output_files = dict()
+        for key in dict_tags.keys():
+            output_file = open(os.path.join(output_folder_path, str(key) + ".json"), 'w', encoding='utf-8')
+            dict_output_files[key] = output_file
+
+    dict_data = dict()
+    for key in dict_tags.keys():
+        dict_data[key] = []
+
+    tweet_count = 0
+    for root, dirs, files in os.walk(folder_path):
+        for dir in dirs:
+            print('processing directory: ', dir)
+            for sub_root, sub_dirs, sub_files in os.walk(os.path.join(folder_path, dir)):
+                for file in sub_files:
+                    file_path = os.path.join(folder_path, dir, file)
+                    print('processing file: ', file)
+                    with bz2.BZ2File(file_path, "r") as f:
+                        for line in f:
+                            tweet_json = json.loads(line)
+                            for key in dict_tags.keys():
+                                filtered_tweet, count = filter_json(tweet_json, lang=lang, hashtags=dict_tags[key][0],
+                                                                    tokens=dict_tags[key][1],
+                                                                    lowercase_match=lowercase_match,
+                                                                    include_rt=include_rt)
+                                if filtered_tweet:
+                                    dict_data[key].append(filtered_tweet)
+                                    if output_folder_path:
+                                        dict_output_files[key].write("%s\n" % json.dumps(filtered_tweet))
+                            tweet_count += count
+    if output_folder_path:
+        for key in dict_output_files.keys():
+            dict_output_files[key].close()
 
     print('tweet count: ', tweet_count)
 
@@ -148,3 +198,23 @@ def read_zip_jsonl_file(file_path):
     return data
 
 
+if __name__ == "__main__":
+    list = ["Abc", "DEf", "ghI"]
+    list2 = ["Zvy", "hji"]
+    lists = []
+    lists.append(list)
+    lists.append(lists)
+    print(lists)
+
+    # lists = [[token.lower() for token in hashtag_list] for hashtag_list in lists]
+    # print(lists)
+    dict_tags = dict()
+    dict_tags[0] = [list, list2]
+    print(dict_tags)
+
+    for key in dict_tags.keys():
+        hashtags = [token.lower() for token in dict_tags[key][0]]
+        tokens = [token.lower() for token in dict_tags[key][1]]
+        dict_tags[key] = [hashtags, tokens]
+
+    print(dict_tags)
