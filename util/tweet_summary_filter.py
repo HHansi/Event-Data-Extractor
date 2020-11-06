@@ -1,6 +1,9 @@
 # Created by Hansi at 10/30/2019
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
+
+# This file includes the methods to filter tweet summary files
+# .tsv files with columns [id timestamp tweet_text hashtags location]
 
 
 # method to filter missing text tweet ids in the input file
@@ -47,7 +50,8 @@ def filter_missing_text_tweet_ids(input_filepath, output_filepath_full, output_f
     n_missing = 0
     for row in csv_reader:
         n_all += 1
-        if "…" == row[2][-1:]:
+        # if "…" == row[2][-1:]:
+        if "…" in row[2]:
             n_missing += 1
             if row[2] in tweet_dict.keys():
                 id_list = tweet_dict[row[2]]
@@ -109,10 +113,16 @@ def filter_tweets_by_time(input_filepath, from_time_str, to_time_str, output_fil
     from_time = datetime.strptime(from_time_str, '%Y_%m_%d_%H_%M_%S')
     to_time = datetime.strptime(to_time_str, '%Y_%m_%d_%H_%M_%S')
 
+    # print(from_time)
+    # print(to_time)
+
     for row in input_reader:
+        # print(row[1])
         if row[1] != "_na_":
             time = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
+            # print(time)
             if (time >= from_time) and (time <= to_time):
+                # print(time)
                 n += 1
                 if output_filepath:
                     output_writer.writerow(row)
@@ -153,6 +163,7 @@ def filter_tweets_by_time_and_text(input_filepath, from_time_str, to_time_str, w
     to_time = datetime.strptime(to_time_str, '%Y_%m_%d_%H_%M_%S')
 
     for row in input_reader:
+        print(row[1])
         if row[1] != "_na_":
             time = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
             if (time >= from_time) and (time <= to_time) and (word_phrase.lower() in row[2].lower()):
@@ -163,37 +174,136 @@ def filter_tweets_by_time_and_text(input_filepath, from_time_str, to_time_str, w
     return n
 
 
+# from_time and to_time format - '%Y_%m_%d_%H_%M_%S' (e.g. '2019_10_20_17_30_00')
+# time_duration - minutes
+def filter_tweets_by_time_bulk(from_time_str, to_time_str, time_duration, input_file_path, output_folder_path):
+    from_time = datetime.strptime(from_time_str, '%Y_%m_%d_%H_%M_%S')
+    to_time = datetime.strptime(to_time_str, '%Y_%m_%d_%H_%M_%S')
+
+    from_time_temp = from_time
+    # while from_time != to_time:
+    while from_time_temp < to_time:
+        to_time_temp = from_time_temp + timedelta(seconds=(60 * (time_duration-1)) + 59)
+        to_time_str = to_time_temp.strftime('%Y_%m_%d_%H_%M_%S')
+
+        short_from_time_str = from_time_str.rsplit('_', 1)[0]
+
+        output_file_path = output_folder_path + short_from_time_str + '.tsv'
+        n = filter_tweets_by_time(input_file_path, from_time_str, to_time_str, output_file_path)
+
+        # print(from_time_str)
+        print(from_time_str + " : " + str(n))
+        stat_file_path = output_folder_path + '/stats.tsv'
+        stat_file = open(stat_file_path, 'a', newline='', encoding='utf-8')
+        stat_writer = csv.writer(stat_file, delimiter='\t')
+        stat_writer.writerow([from_time_str, n])
+        stat_file.close()
+
+        from_time_temp = from_time_temp + timedelta(seconds=60 * time_duration)
+        from_time_str = from_time_temp.strftime('%Y_%m_%d_%H_%M_%S')
+
+
 if __name__ == "__main__":
-    # input_folder = '../data/full_dataset/BrexitVote/event/completed'
-    # output_folder = '../data/full_dataset/BrexitVote/event_full_dataset'
+    # input_folder = '../data/full_dataset/MUNLIV/all/'
+    # output_folder = '../data/full_dataset/MUNLIV/all/event-extra/'
     # if not os.path.exists(output_folder):
     #     os.makedirs(output_folder)
+    #
+    # from_time = '2019_10_20_15_15_00'
+    # to_time = '2019_10_20_17_30_00'
     #
     # for root, dirs, files in os.walk(input_folder):
     #     for file in files:
     #         file_name = os.path.splitext(file)[0]
     #         input_filepath = input_folder + "/" + file
-    #         output_filepath_full = output_folder + "/full-text/" + file
-    #         output_filepath_missing = output_folder + "/missing-text/" + file
-    #         filter_missing_text_tweet(input_filepath, output_filepath_full, output_filepath_missing)
+    #         output_filepath = output_folder + "/" + file
+    #
+    #         filter_tweets_by_time(input_filepath, from_time, to_time, output_filepath)
 
-    input_filepath = '../data/full_dataset/BrexitVote/event_full_dataset/full_dataset.tsv'
-    output_filepath = '../data/full_dataset/BrexitVote/event_full_dataset/dataset-'
+    # input_filepath = '../data/full_dataset/MUNLIV/dataset-all-with-missing.tsv'
+    # output_filepath_full = '../data/full_dataset/MUNLIV/dataset-full2.tsv'
+    # output_filepath_missing = '../data/full_dataset/MUNLIV/dataset-missing2.tsv'
+    # filter_missing_text_tweet_ids(input_filepath, output_filepath_full, output_filepath_missing)
+    # input_filepath = '../data/full_dataset/BrexitVote/full-dataset-7_30-17_30.tsv'
+    # output_filepath_full = '../data/full_dataset/BrexitVote/full-dataset-7_30-17_30-full.tsv'
+    # output_filepath_missing = '../data/full_dataset/BrexitVote/full-dataset-7_30-17_30-missing.tsv'
+    # filter_missing_text_tweet_ids(input_filepath, output_filepath_full, output_filepath_missing)
 
-    word_phrase = 'Welsh'
-    print(word_phrase)
-    print(filter_tweets_by_text(input_filepath, word_phrase))
+    # input_filepath = '../data/full_dataset/UKElection/dataset.tsv'
+    # output_filepath = '../data/full_dataset/UKElection/test-filters/dataset-'
+    #
+    # word_phrase = 'Workington'
+    # print(word_phrase)
+    # print(filter_tweets_by_text(input_filepath, word_phrase))
+    #
+    # from_time = '2019_12_13_01_30_00'
+    # to_time = '2019_12_13_01_45_59'
+    # print(from_time + "-" + to_time)
+    # output_filepath1 = output_filepath + word_phrase + "-" + from_time + "-" + to_time + ".tsv"
+    # output_filepath2 = output_filepath +from_time + "-" + to_time + ".tsv"
+    # print(filter_tweets_by_time(input_filepath, from_time, to_time, output_filepath2))
+    # print(filter_tweets_by_time_and_text(input_filepath, from_time, to_time, word_phrase))
 
-    from_time = '2019_10_19_9_30_00'
-    to_time = '2019_10_19_10_00_59'
-    print(from_time + "-" + to_time)
-    output_filepath1 = output_filepath + word_phrase + "-" + from_time + "-" + to_time + ".tsv"
-    output_filepath2 = output_filepath +from_time + "-" + to_time + ".tsv"
-    print(filter_tweets_by_time(input_filepath, from_time, to_time))
-    print(filter_tweets_by_time_and_text(input_filepath, from_time, to_time, word_phrase, output_filepath1))
+    # split data set into tome frames
+    # from_time_str = '2019_10_19_9_59_00'
+    # from_time = datetime.strptime(from_time_str, '%Y_%m_%d_%H_%M_%S')
+    # b = from_time + timedelta(seconds=60)
+    # print(from_time)
+    # print(b)
+    # c = b.strftime('%Y_%m_%d_%H_%M_%S')
+    # print(c)
 
+    # end_time_str = '2019_10_20_17_08_00'
+    # from_time_str = '2019_10_20_15_30_00'
 
+    # end_time_str = '2019_10_20_17_30_00'
+    # from_time_str = '2019_10_19_7_30_00'
+    #
+    # end_time = datetime.strptime(end_time_str, '%Y_%m_%d_%H_%M_%S')
+    # from_time = datetime.strptime(from_time_str, '%Y_%m_%d_%H_%M_%S')
+    #
+    # input_file_path = '../data/full_dataset/BrexitVote/dataset-all-7_30-17_30.tsv'
+    # output_folder_path = '../data/full_dataset/BrexitVote/time-frames/'
+    #
+    # stat_file_path = '../data/full_dataset/BrexitVote/time-frames/stats.tsv'
+    # stat_file = open(stat_file_path, 'a', newline='', encoding='utf-8')
+    # stat_writer = csv.writer(stat_file, delimiter='\t')
+    #
+    # while from_time != end_time:
+    #     to_time = from_time + timedelta(seconds=(60 * 30) + 59)
+    #     to_time_str = to_time.strftime('%Y_%m_%d_%H_%M_%S')
+    #
+    #     # print(from_time)
+    #     # print(to_time)
+    #     short_from_time_str = from_time_str.rsplit('_', 1)[0]
+    #
+    #     output_file_path = output_folder_path + short_from_time_str + '.tsv'
+    #     n = filter_tweets_by_time(input_file_path, from_time_str, to_time_str, output_file_path)
+    #
+    #     # print(from_time_str)
+    #     print(from_time_str + " : " + str(n))
+    #     stat_writer.writerow([from_time_str, n])
+    #
+    #     from_time = from_time + timedelta(seconds=60 * 30)
+    #
+    #     # print(from_time)
+    #     from_time_str = from_time.strftime('%Y_%m_%d_%H_%M_%S')
 
+    # from_time_str = '2019_12_12_21_30_00'
+    # to_time_str = '2019_12_13_09_00_00'
+    # input_file_path = '../data/full_dataset/UKElection/dataset.tsv'
+    # output_folder_path = '../data/full_dataset/UKElection/time-frames/'
+    # duration = 15
+    # filter_tweets_by_time_bulk(from_time_str, to_time_str, duration, input_file_path, output_folder_path)
 
+    # input_file = 'E:/Work Spaces/Python/Event-Data-Extractor/data/full_dataset/BrexitVote/full-dataset-7_30-17_30.tsv'
+    # output_file = 'E:/Work Spaces/Python/Event-Data-Extractor/data/full_dataset/BrexitVote/full-dataset-7_30-17_30-without-na.tsv'
+    # output_missing_file = 'E:/Work Spaces/Python/Event-Data-Extractor/data/full_dataset/BrexitVote/full-dataset-7_30-17_30-na.tsv'
+    # filter_empty_tweets(input_file, output_file, output_missing_file)
 
+    from_time_str = '2020_08_23_18_30_00'
+    to_time_str = '2020_08_23_21_25_40'
+    input_file = "E:/Work Spaces/Event-data/UCL final 2020/UCLFinal.tsv"
+    output_file = "E:/Work Spaces/Event-data/UCL final 2020/UCLFinal-event.tsv"
+    filter_tweets_by_time(input_file, from_time_str, to_time_str, output_filepath=output_file)
 
