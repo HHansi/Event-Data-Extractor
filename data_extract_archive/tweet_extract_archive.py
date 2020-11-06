@@ -198,23 +198,3 @@ def read_zip_jsonl_file(file_path):
     return data
 
 
-if __name__ == "__main__":
-    list = ["Abc", "DEf", "ghI"]
-    list2 = ["Zvy", "hji"]
-    lists = []
-    lists.append(list)
-    lists.append(lists)
-    print(lists)
-
-    # lists = [[token.lower() for token in hashtag_list] for hashtag_list in lists]
-    # print(lists)
-    dict_tags = dict()
-    dict_tags[0] = [list, list2]
-    print(dict_tags)
-
-    for key in dict_tags.keys():
-        hashtags = [token.lower() for token in dict_tags[key][0]]
-        tokens = [token.lower() for token in dict_tags[key][1]]
-        dict_tags[key] = [hashtags, tokens]
-
-    print(dict_tags)

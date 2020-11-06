@@ -100,14 +100,7 @@ if __name__ == "__main__":
 
     # merge_without_duplicates_json(folder_path, file_path)
 
-    # hashtags = ['olympictorchrelay', 'olympicflame']
-    # tokens = ['torch', 'flame', 'relay']
     hashtags = None
-    # tokens = ['postponement', 'decision', 'postpone', 'postponing', 'postponed']
-    # tokens = ['postponement', 'decision']
-    # tokens = ['tokyo', 'games', '2020', '2021', 'postponed', 'summer', 'ioc']
-    # tokens = ['postponed']
-    # tokens = ['2021', 'postponed', 'summer', 'ioc', 'july', '23', 'new', '8']
     tokens = ['2021', 'postponed', 'july', '23', 'new dates', '8', 'august']
     filter_extracted_data(file_path, hashtags=hashtags, tokens=tokens, output_file_path=filtered_data_path)
 

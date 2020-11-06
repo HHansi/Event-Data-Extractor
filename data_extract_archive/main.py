@@ -15,14 +15,14 @@ def single_process():
 
     date = "03/15"
     topic = "E4"
-    id = "0"
+    id = "1"
     folder_path = os.path.join(input_folder, date)
 
     # Filter data
     include_rt = True
     lang = 'en'
-    hashtags = ['coronavirus', 'covid19']
-    tokens = ['vaccine']
+    hashtags = ['vaccine']
+    tokens = ['coronavirus', 'covid19', 'covid-19']
     # hashtags = None
     # tokens = ['cyclone harold', 'harold cyclone', 'cyclone']
 
@@ -50,7 +50,7 @@ def single_process():
 
     # merge files into single tweet data file (.json)
     json_data_file = os.path.join(filtered_folder, date, topic + ".json" )
-    merge_without_duplicates_json(folder_path, json_data_file)
+    # merge_without_duplicates_json(folder_path, json_data_file)
     summary_data_file = os.path.join(summary_folder, date, topic + ".tsv")
     # get_tweet_summary(json_data_file, summary_data_file)
 
@@ -61,19 +61,19 @@ def multiple_process():
     summary_folder = "F:/Twitter data/summary"
 
     date = "03/15"
-    topic = "E3"
+    topic = "E4"
     folder_path = os.path.join(input_folder, date)
 
     # Filter data
     include_rt = True
     lang = 'en'
     dict_tags = dict()
-    hashtags = ['cycloneharold', 'harold', 'tcharold']
-    tokens = None
+    hashtags = ['coronavirus', 'covid19', 'coronavirusoutbreak', 'covid-19']
+    tokens = ['vaccine']
     dict_tags[0] = [hashtags, tokens]
 
-    hashtags = None
-    tokens = ['cyclone harold', 'harold cyclone']
+    hashtags = ['vaccine']
+    tokens = ['coronavirus', 'covid19', 'covid-19']
     dict_tags[1] = [hashtags, tokens]
 
     # hashtags = ['coronavirus', 'covid19', 'coronalockdown', 'coronavirusoutbreak', 'covid19uk', 'covid2019']
@@ -112,5 +112,5 @@ def multiple_process():
 
 
 if __name__ == "__main__":
-    # multiple_process()
-    single_process()
+    multiple_process()
+    # single_process()
