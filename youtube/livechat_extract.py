@@ -2,7 +2,12 @@ import pytchat
 import pandas as pd
 import os
 
-video_id = 'YEj2RakIf4s'
+# 705138
+# 822726
+
+
+# video_id = 'YEj2RakIf4s'  # https://www.youtube.com/watch?v=YEj2RakIf4s&ab_channel=AssociatedPress
+video_id = 'VvrAStFTb3s'  # https://www.youtube.com/watch?v=VvrAStFTb3s&ab_channel=CNN-News18
 
 if not os.path.exists(video_id):
     os.makedirs(video_id)
