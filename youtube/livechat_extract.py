@@ -15,11 +15,11 @@ n = 0
 
 while chat.is_alive():
     for c in chat.get().sync_items():
-        print(f"{c.datetime} {c.author.name} {c.message}")
+        print(f"{c.id}\t{c.datetime}\t{c.author.name}\t{c.message}")
         df.loc[i] = [c.id, c.message, c.datetime, c.author.name, c.type]
         i += 1
 
-        if i==200:
+        if i==100:
             print(f'saving iteration {n}')
             df.to_csv(f"{video_id}/livechat_{n}.csv", index=False, encoding='utf-8')
             n += 1
