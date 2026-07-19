@@ -70,10 +70,10 @@ KEYWORDS = [
     # "mundial", "copa del mundo", "coupe du monde",
 ]
 
-OUTPUT_DIR = Path("bs_fifa")
+OUTPUT_DIR = Path("bs_fifa_final")
 OUTPUT_PREFIX = "worldcup_posts"   # files will be named worldcup_posts_00001.jsonl, _00002.jsonl, ...
-CURSOR_FILE = Path("worldcup_cursor.txt")
-HANDLE_CACHE_FILE = Path("handle_cache.json")
+CURSOR_FILE = Path("worldcup_cursor_final.txt")
+HANDLE_CACHE_FILE = Path("handle_cache_final.json")
 
 MAX_ROWS_PER_FILE = 2000    # start a new file once the current one reaches this many rows
 SAVE_EVERY_N_POSTS = 20     # flush to disk after this many matched posts
